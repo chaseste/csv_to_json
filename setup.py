@@ -7,5 +7,8 @@ ext_modules = cythonize([
     Extension("csv_to_json.transfomers", ["csv_to_json/transformers.py"])],)
 
 setup(
+    name='csv_to_json',
+    version='0.0.0',
+    description='CSV to JSON transforms',
     ext_modules=ext_modules
 )

@@ -16,11 +16,7 @@ from .csv_transfomer import (
 class AllergyToJson(CsvToJson):
     """ Allergy CSV to Json Transformer """
 
-    __fields__ = [
-        "seq", "pat_id", "pat_name", "pat_birth", "pat_admin_sex", "visit_id", "allergen_type", "allergen", 
-        "severity", "onset", "reaction_status", "reaction_class", "source_of_info", "source_of_info_ft", 
-        "cancel_dt_tm", "reviewed_dt_tm", "reaction", "physician", "comment"
-    ]
+    __fields__ = 19
 
     def transform(self, fields):
         trans = {
@@ -53,12 +49,7 @@ class AllergyToJson(CsvToJson):
 class ProblemToJson(CsvToJson):
     """ Problem CSV to Json Transformer """
 
-    __fields__ = [
-        "seq", "pat_id", "pat_name", "pat_birth", "pat_admin_sex", "action_dt_tm", "problem", "management_discipline", 
-        "persistence", "confirmation_status", "life_cycle_status", "life_cycle_status_dt_tm", "onset_dt_tm", 
-        "ranking", "certainty", "person_aware", "prognosis", "person_aware_prognosis", "family_aware", "classification",
-        "cancel_reason", "severity", "severity_class", "comments", "physician", "annotated_display"
-    ]
+    __fields__ = 26
 
     def transform(self, fields):
         trans = {

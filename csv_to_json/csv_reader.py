@@ -31,18 +31,18 @@ def csv_to_list(data, fields):
     """ Converts the raw csv column to a list of dicts with the specified field names """
     return list(dict(zip(fields, f)) for f in data)
 
-def reader(f, fieldnames):
+def reader(f, field_cnt):
     """ Override the CSV's native readersince it strips quotes when the field 
     doesn't contain a comma... Disabling quoting breaks when the field does 
     contain a comma but fixes when the sub delimiters are present instead.
     Unfortunately the only solution is to substitute the reader while maintaining
     the dict reader's functionality """
-    inst = CsvReader(f, fieldnames)
+    inst = CsvReader(f, field_cnt)
 
     """ Look to see if the file contains a header or not, if so, we'll skip it, otherwise 
         we'll leave the file alone. Looking for the SEQ header should be sufficient to skip """
     pos = f.tell()
-    has_header = f.read(4).lower().startswith("".join([fieldnames[0], "|"]))
+    has_header = f.read(4).upper().startswith("SEQ|")
     if has_header:
        f.readline()
     else:
@@ -55,9 +55,9 @@ class CsvReader:
         which doesn't work for this application since the CSV has delimiters
         for subfields that need the quotes to escape them. """
 
-    def __init__(self, f, fieldnames):
+    def __init__(self, f, field_cnt):
         self.f = f
-        self.field_cnt = len(fieldnames) 
+        self.field_cnt = field_cnt 
     
     def __iter__(self):
         return self
