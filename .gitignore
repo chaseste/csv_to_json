@@ -132,12 +132,15 @@ dmypy.json
 .pyre/
 
 # Test folders
-/test/out
-/test/in
-/test/samples/*xl.csv
+/tests/out
+/tests/in
+*xl.csv
 
 # Windows bat files
 *.bat
 
 # Unix shell scripts
 *.sh
+
+# Profiling
+log.txt

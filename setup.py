@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 ext_modules = cythonize([
@@ -10,5 +10,6 @@ setup(
     name='csv_to_json',
     version='0.0.0',
     description='CSV to JSON transforms',
+    packages=find_packages(),
     ext_modules=ext_modules
 )

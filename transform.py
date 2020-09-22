@@ -1,5 +1,4 @@
 """ Transformation script """
-
 import sys
 import os
 import csv_to_json.transformers as transformers

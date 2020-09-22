@@ -1,3 +1,5 @@
+""" CSV to JSON Transformation """
+from typing import List, Dict
 from .csv_transfomer import (
     CsvToJson,
     transform_string,
@@ -18,7 +20,7 @@ class AllergyToJson(CsvToJson):
 
     __fields__ = 19
 
-    def transform(self, fields):
+    def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
             "ids": transform_ids(fields[1]),
             "name": transform_name(fields[2]),
@@ -27,23 +29,23 @@ class AllergyToJson(CsvToJson):
             "encounter": {
                 "ids": transform_ids(fields[5])
             },
-            "allergys": {
+            "allergys": [{
                 "allergen_type": transform_code(fields[6]),
                 "allergen": transform_code(fields[7]),
-            }
+            }]
         }
-        allergys = trans["allergys"]
-        transform_code_optional(fields[8], allergys, "severity")
-        transform_string_optional(fields[9], allergys, "onset")
-        transform_code_optional(fields[10], allergys, "reaction_status")
-        transform_code_optional(fields[11], allergys, "reaction_class")
-        transform_code_optional(fields[12], allergys, "source_of_info")
-        transform_string_optional(fields[13], allergys, "source_of_info_ft")
-        transform_string_optional(fields[14], allergys, "cancel_dt_tm")
-        transform_string_optional(fields[15], allergys, "reviewed_dt_tm")
-        transform_reactions(fields[16], allergys)
-        transform_physician(fields[17], allergys)
-        transform_comments(fields[18], allergys)
+        allergy = trans["allergys"][0]
+        transform_code_optional(fields[8], allergy, "severity")
+        transform_string_optional(fields[9], allergy, "onset")
+        transform_code_optional(fields[10], allergy, "reaction_status")
+        transform_code_optional(fields[11], allergy, "reaction_class")
+        transform_code_optional(fields[12], allergy, "source_of_info")
+        transform_string_optional(fields[13], allergy, "source_of_info_ft")
+        transform_string_optional(fields[14], allergy, "cancel_dt_tm")
+        transform_string_optional(fields[15], allergy, "reviewed_dt_tm")
+        transform_reactions(fields[16], allergy)
+        transform_physician(fields[17], allergy)
+        transform_comments(fields[18], allergy)
         return trans
 
 class ProblemToJson(CsvToJson):
@@ -51,35 +53,35 @@ class ProblemToJson(CsvToJson):
 
     __fields__ = 26
 
-    def transform(self, fields):
+    def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
             "ids": transform_ids(fields[1]),
             "name": transform_name(fields[2]),
             "birth_date": transform_string(fields[3]),
             "admin_sex": transform_code(fields[4]),
-            "problems": {
+            "problems": [{
                 "action_dt_tm": transform_string(fields[5]),
                 "condition": transform_code(fields[6]),
-            }
+            }]
         }
-        problems = trans["problems"]
-        transform_codes_optional(fields[7], problems, "management_discipline")
-        transform_code_optional(fields[8], problems, "persistence")
-        transform_code_optional(fields[9], problems, "confirmation_status")
-        transform_code_optional(fields[10], problems, "life_cycle_status")
-        transform_string_optional(fields[11], problems, "status_dt_tm")
-        transform_string_optional(fields[12], problems, "onset_dt_tm")
-        transform_code_optional(fields[13], problems, "ranking")
-        transform_code_optional(fields[14], problems, "certainty")
-        transform_code_optional(fields[15], problems, "individual_awareness")
-        transform_code_optional(fields[16], problems, "prognosis")
-        transform_code_optional(fields[17], problems, "individual_awareness_prognosis")
-        transform_code_optional(fields[18], problems, "family_awareness")
-        transform_code_optional(fields[19], problems, "classification")
-        transform_code_optional(fields[20], problems, "cancel_reason")
-        transform_code_optional(fields[21], problems, "severity")
-        transform_code_optional(fields[22], problems, "severity_class")
-        transform_comments(fields[23], problems)
-        transform_physician(fields[24], problems)
-        transform_string_optional(fields[25], problems, "annotated_display")
+        problem = trans["problems"][0]
+        transform_codes_optional(fields[7], problem, "management_discipline")
+        transform_code_optional(fields[8], problem, "persistence")
+        transform_code_optional(fields[9], problem, "confirmation_status")
+        transform_code_optional(fields[10], problem, "life_cycle_status")
+        transform_string_optional(fields[11], problem, "status_dt_tm")
+        transform_string_optional(fields[12], problem, "onset_dt_tm")
+        transform_code_optional(fields[13], problem, "ranking")
+        transform_code_optional(fields[14], problem, "certainty")
+        transform_code_optional(fields[15], problem, "individual_awareness")
+        transform_code_optional(fields[16], problem, "prognosis")
+        transform_code_optional(fields[17], problem, "individual_awareness_prognosis")
+        transform_code_optional(fields[18], problem, "family_awareness")
+        transform_code_optional(fields[19], problem, "classification")
+        transform_code_optional(fields[20], problem, "cancel_reason")
+        transform_code_optional(fields[21], problem, "severity")
+        transform_code_optional(fields[22], problem, "severity_class")
+        transform_comments(fields[23], problem)
+        transform_physician(fields[24], problem)
+        transform_string_optional(fields[25], problem, "annotated_display")
         return trans

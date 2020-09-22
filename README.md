@@ -32,7 +32,7 @@ So why not update your process to output JSON and abandon CSV? Thats the hard pa
 
 So why Python? Python is a simple programming language to learn, has tons of libraries, community support, along with a robust job orchestraton / workflow platform like [Airflow](https://airflow.apache.org/). 
 
-Back to the real motivation. Time. I'm by no means an expert Python programmer. In total I spent around 8 hours coding the transforms. Did I write tests? Not yet... though it wouldn't take too much time. Adding additional transforms is pretty straight forward. Adding the problem transform took around 30 minutes. Most of my time was spent creating the initial (allergy) transform, profiling the code. Being able to write a transform quickly is key if your goal is to be a bridge long term or the transform is specific to a consumer request (one off). 
+Back to the real motivation. Time. I'm by no means an expert Python programmer. In total I spent around 8 hours coding the transforms. Did I write tests? Not completely... though it wouldn't take too much time to complete. Adding additional transforms is pretty straight forward. Adding the problem transform took around 30 minutes. Most of my time was spent creating the initial (allergy) transform, profiling the code. Being able to write a transform quickly is key if your goal is to be a bridge long term or the transform is specific to a consumer request (one off). 
 
 Final comments. Whether you chose to use Python or not. Implementing JSON is beneficial for cases where consumers (clients) request (pay) for one off mappings to their proprietory spec. Given JSON is easy to work with, writing these one off transforms from JSON will reduce coding time. Using a program language like Python along with a worflow platform like airflow you can create transformation pipelines where the initial step is converting to JSON. JSON also allows for consolidation | grouping of data where the JSON object could echo your CSV where each row has a coresponding JSON object or the object contains similar rows (aka all person allergies vs a single allergy) without having to define a new object (JSON lists). 
 
@@ -60,7 +60,7 @@ The out of the box Python parser will only escape / maintain the escape "quotes"
 
 ## Raw (Unformatted)
 ```
-{"ids": [{"id": "12345", "authority": "Hospital MRN", "id_type": "MRN"}, {"id": "67890", "authority": "HIE MRN", "id_type": "CMRN"}], "name": {"last": "ZZLast", "first": "Jane", "middle": "Marie"}, "birth_date": "19500701143000", "admin_sex": {"id": "362", "description": "Female"}, "encounter": {"ids": [{"id": "893727", "authority": "Hospital FIN", "id_type": "FIN"}]}, "allergys": {"allergen_type": {"id": "Drug"}, "allergen": {"id": "723", "description": "Amoxicillin", "coding_method": "RXCUI"}, "severity": {"id": "SEVERE"}, "onset": "20180724", "reaction_status": {"id": "CANCELED"}, "reaction_class": {"id": "CLASS"}, "source_of_info": {"id": "PARENT"}, "source_of_info_ft": "Parent", "cancel_dt_tm": "20190813165421", "reviewed_dt_tm": "20190813165431", "reactions": [{"code": {"id": "498834018", "description": "Abdominal swelling |~ distended areas", "coding_method": "SNOMED"}, "severity": {"id": "777777", "description": "desc", "coding_method": "SNOMED"}}], "physician": {"id": {"id": "13243", "authority": "NPI"}, "name": {"last": "ZZPhylast", "first": "Robert"}, "phys_type": "REV"}, "comments": [{"text": "Discovered during ER visit ~July|August 2018", "comment_dt_tm": "06/19/1999 12:34:56", "physician": {"id": {"id": "ID1234", "authority": "NPI"}, "name": {"last": "Test1", "first": "Physician1"}}}, {"text": "Bad swelling to chest, head", "comment_dt_tm": "01/01/1991 01:11:11", "physician": {"id": {"id": "ID5678", "authority": "NPI"}, "name": {"last": "Test2", "first": "Physician2"}}}]}}
+{"ids": [{"id": "12345", "authority": "Hospital MRN", "id_type": "MRN"}, {"id": "67890", "authority": "HIE MRN", "id_type": "CMRN"}], "name": {"last": "ZZLast", "first": "Jane", "middle": "Marie"}, "birth_date": "19500701143000", "admin_sex": {"id": "362", "description": "Female"}, "encounter": {"ids": [{"id": "893727", "authority": "Hospital FIN", "id_type": "FIN"}]}, "allergys": [{"allergen_type": {"id": "Drug"}, "allergen": {"id": "723", "description": "Amoxicillin", "coding_method": "RXCUI"}, "severity": {"id": "SEVERE"}, "onset": "20180724", "reaction_status": {"id": "CANCELED"}, "reaction_class": {"id": "CLASS"}, "source_of_info": {"id": "PARENT"}, "source_of_info_ft": "Parent", "cancel_dt_tm": "20190813165421", "reviewed_dt_tm": "20190813165431", "reactions": [{"code": {"id": "498834018", "description": "Abdominal swelling |~ distended areas", "coding_method": "SNOMED"}, "severity": {"id": "777777", "description": "desc", "coding_method": "SNOMED"}}], "physician": {"id": {"id": "13243", "authority": "NPI"}, "name": {"last": "ZZPhylast", "first": "Robert"}, "phys_type": "REV"}, "comments": [{"text": "Discovered during ER visit ~July|August 2018", "comment_dt_tm": "06/19/1999 12:34:56", "physician": {"id": {"id": "ID1234", "authority": "NPI"}, "name": {"last": "Test1", "first": "Physician1"}}}, {"text": "Bad swelling to \"chest\", head", "comment_dt_tm": "01/01/1991 01:11:11", "physician": {"id": {"id": "ID5678", "authority": "NPI"}, "name": {"last": "Test2", "first": "Physician2"}}}]}]}
 ```
 
 ## Formatted
@@ -97,87 +97,89 @@ The out of the box Python parser will only escape / maintain the escape "quotes"
 			}
 		]
 	},
-	"allergys": {
-		"allergen_type": {
-			"id": "Drug"
-		},
-		"allergen": {
-			"id": "723",
-			"description": "Amoxicillin",
-			"coding_method": "RXCUI"
-		},
-		"severity": {
-			"id": "SEVERE"
-		},
-		"onset": "20180724",
-		"reaction_status": {
-			"id": "CANCELED"
-		},
-		"reaction_class": {
-			"id": "CLASS"
-		},
-		"source_of_info": {
-			"id": "PARENT"
-		},
-		"source_of_info_ft": "Parent",
-		"cancel_dt_tm": "20190813165421",
-		"reviewed_dt_tm": "20190813165431",
-		"reactions": [
-			{
-				"code": {
-					"id": "498834018",
-					"description": "Abdominal swelling |~ distended areas",
-					"coding_method": "SNOMED"
+	"allergys": [
+		{
+			"allergen_type": {
+				"id": "Drug"
+			},
+			"allergen": {
+				"id": "723",
+				"description": "Amoxicillin",
+				"coding_method": "RXCUI"
+			},
+			"severity": {
+				"id": "SEVERE"
+			},
+			"onset": "20180724",
+			"reaction_status": {
+				"id": "CANCELED"
+			},
+			"reaction_class": {
+				"id": "CLASS"
+			},
+			"source_of_info": {
+				"id": "PARENT"
+			},
+			"source_of_info_ft": "Parent",
+			"cancel_dt_tm": "20190813165421",
+			"reviewed_dt_tm": "20190813165431",
+			"reactions": [
+				{
+					"code": {
+						"id": "498834018",
+						"description": "Abdominal swelling |~ distended areas",
+						"coding_method": "SNOMED"
+					},
+					"severity": {
+						"id": "777777",
+						"description": "desc",
+						"coding_method": "SNOMED"
+					}
+				}
+			],
+			"physician": {
+				"id": {
+					"id": "13243",
+					"authority": "NPI"
 				},
-				"severity": {
-					"id": "777777",
-					"description": "desc",
-					"coding_method": "SNOMED"
-				}
-			}
-		],
-		"physician": {
-			"id": {
-				"id": "13243",
-				"authority": "NPI"
+				"name": {
+					"last": "ZZPhylast",
+					"first": "Robert"
+				},
+				"phys_type": "REV"
 			},
-			"name": {
-				"last": "ZZPhylast",
-				"first": "Robert"
-			},
-			"phys_type": "REV"
-		},
-		"comments": [
-			{
-				"text": "Discovered during ER visit ~July|August 2018",
-				"comment_dt_tm": "06/19/1999 12:34:56",
-				"physician": {
-					"id": {
-						"id": "ID1234",
-						"authority": "NPI"
-					},
-					"name": {
-						"last": "Test1",
-						"first": "Physician1"
+			"comments": [
+				{
+					"text": "Discovered during ER visit ~July|August 2018",
+					"comment_dt_tm": "06/19/1999 12:34:56",
+					"physician": {
+						"id": {
+							"id": "ID1234",
+							"authority": "NPI"
+						},
+						"name": {
+							"last": "Test1",
+							"first": "Physician1"
+						}
+					}
+				},
+				{
+					"text": "Bad swelling to \"chest\", head",
+					"comment_dt_tm": "01/01/1991 01:11:11",
+					"physician": {
+						"id": {
+							"id": "ID5678",
+							"authority": "NPI"
+						},
+						"name": {
+							"last": "Test2",
+							"first": "Physician2"
+						}
 					}
 				}
-			},
-			{
-				"text": "Bad swelling to chest, head",
-				"comment_dt_tm": "01/01/1991 01:11:11",
-				"physician": {
-					"id": {
-						"id": "ID5678",
-						"authority": "NPI"
-					},
-					"name": {
-						"last": "Test2",
-						"first": "Physician2"
-					}
-				}
-			}
-		]
-	}
+			]
+		}
+	]
 }
 ```
 
@@ -255,7 +257,7 @@ By default Cython won't provide profiling information. To enable this for csv_re
 | 1 | 151.697 | transform.py:7(main) |
 
 # What's Left?
-- Handle escaped quotes (harden parser)
-- Unit tests
+- Harden parser
+- Additional unit tests
 - Additional transforms
 - Airflow integration
