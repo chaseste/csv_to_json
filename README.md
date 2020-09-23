@@ -1,6 +1,9 @@
 # csv_to_json
 CSV to JSON transform
 
+![coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)
+![python](https://img.shields.io/badge/python-3.8-blue)
+
 ##### Table of Contents
 - [Why Bother?](#why-bother)
 - [CSV](#csv)
@@ -11,6 +14,8 @@ CSV to JSON transform
   * [Raw (Unformatted)](#raw-unformatted)
   * [Formatted](#formatted)
 - [Transforms](#transforms)
+  * [Identity Transform](#identity-transform)
+  * [Combine Transform](#combine-transform)
   * [Transform.py](#transformpy)
     + [Command](#command)
   * [Cython (Optional)](#cython-optional)
@@ -24,6 +29,11 @@ CSV to JSON transform
         * [profile=True](#profile-true)
         * [profile=False](#profile-false)
 - [What's Left?](#whats-left)
+- [Running the Tests](#running-the-tests)
+  * [Source Code](#source-code)
+  * [Installed Module](#installed-module)
+- [Code Coverage](#code-coverage)
+  * [Coverage Report](#report)
 
 # Why Bother?
 CSV works great for simple data where the data is relatively flat (table dump, etc.) though for complex data where fields (columns) can repeat, have subfields, etc. CSV breaks down. The transformation of the CSV into something processable is mainly on each comsumer. Enter JSON. JSON works well with simple and complex data. Is supported by most if not all programming languages either natively or via extension. Is relatively light wieght and parsing is generally pretty fast since it powers the web. 
@@ -39,6 +49,7 @@ Final comments. Whether you chose to use Python or not. Implementing JSON is ben
 So is Python good enough? Maybe... Still not convinced JSON is the way? Should probably stop here unless you're curious.
 
 # CSV 
+The CSV specification used is based on the Cerner Millennium extract specifications.
 
 ## Delimiters
 | Specification | Value |
@@ -186,11 +197,17 @@ The out of the box Python parser will only escape / maintain the escape "quotes"
 # Transforms
 As of now only Allergy | Problem transforms were written.
 
+## Identity Transform
+Each record in the CSV will have a corresponding json record in the output file. This is the default
+
+## Combine Transform
+Records for the same person in the CSV will be combined into a single JSON record in the output file. A person is considered the same when they have the same name, birth date and gender.
+
 ## Transform.py
-The transformation script takes in three arguments. The type of transformation, the "in" directory to scan and the "out" directory to write the json files to. The output file will maintain the original csv file name. Upon completion the csv file will be deleted from the "in" directory.
+The transformation script takes in four arguments. The type of transformation, the "in" directory to scan and the "out" directory to write the json files to are required. The option (-c or -C) to combine records for a person is optional. The output file will maintain the original csv file name. Upon completion the csv file will be deleted from the "in" directory.
 
 ```
-python transform.py type in_dir out_dir
+python transform.py type in_dir out_dir option
 ```
 
 ## Cython (Optional)
@@ -259,5 +276,48 @@ By default Cython won't provide profiling information. To enable this for csv_re
 # What's Left?
 - Harden parser
 - Additional unit tests
-- Additional transforms
-- Airflow integration
+- Additional combine logic?
+- Additional transforms?
+
+# Running the Tests
+The tests can be run locally against the source code or the installed module.
+
+## Source Code
+When running the tests locally make sure the module has been uninstalled (if previously installed) along with deleting the __pycache__ in csv_to_json to ensure the scripts are used.
+
+```
+# Ensure the module has been uninstalled (ommit if not installed)
+pip uninstall csv_to_json
+# Ensure pytest can find your module when it hasn't been installed
+set PYTHONPATH=.
+pytest
+```
+
+## Installed Module
+```
+# Ensure pytest is using the installed module (ommit if not previously set)
+set PYTHONPATH=
+pip install .
+pytest
+```
+
+# Code Coverage
+Code coverage is provided by [pytest-cov](https://github.com/pytest-dev/pytest-cov)
+
+```
+pytest --cov=csv_to_json tests/
+```
+
+## Coverage Report
+```
+----------- coverage: platform win32, python 3.8.5-final-0 -----------
+Name                            Stmts   Miss  Cover
+---------------------------------------------------
+csv_to_json\__init__.py             0      0   100%
+csv_to_json\csv_reader.py          52      3    94%
+csv_to_json\csv_transfomer.py     105      9    91%
+csv_to_json\transformers.py        56      2    96%
+---------------------------------------------------
+TOTAL                             213     14    93%
+
+```

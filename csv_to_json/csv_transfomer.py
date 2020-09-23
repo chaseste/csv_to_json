@@ -4,6 +4,11 @@ from abc import ABCMeta, abstractmethod
 from typing import Union, List, Dict, TextIO
 from .csv_reader import reader, csv_to_list, csv_to_dict
 
+def is_same_person(trans: Dict, next_trans: Dict) -> bool:
+    """ Whether the person is the same for both transformations """
+    return trans["name"] == next_trans["name"] and trans["birth_date"] == next_trans["birth_date"] and\
+        trans["admin_sex"] == next_trans["admin_sex"]
+
 def identity_transform(orig: Dict[str, str], org_key: str, dest: Dict) -> None:
     """ Identity transform from one field in a dict to another """
     try:
@@ -120,20 +125,51 @@ def transform_reactions(data: List[List], dest: Dict) -> None:
 class CsvToJson(metaclass=ABCMeta):
     """ Base CSV to JSON transformer """
 
+    def __init__(self, combine:bool = False):
+        self.transformation = self.__combine_transform if combine else self.__idenity_transform
+
+    def __idenity_transform(self, r):
+        """ Performs an identity transformation where each row in the CSV will have a
+            corresponding JSON record """
+        transform = self.transform
+
+        yield transform(next(r))
+        for fields in r:
+            yield transform(fields)
+
+    def __combine_transform(self, r):
+        """ Performs an combine transformation where similar CSV records will be combined
+            into a single JSON record """
+        transform = self.transform
+        combine = self.combine
+
+        trans = transform(next(r))
+        for fields in r:
+            _next = transform(fields)
+            if not combine(trans, _next):                    
+                yield trans
+                trans = _next
+        yield trans
+
     @abstractmethod
     def transform(self, fields: List[List[str]]) -> Dict:
         """ Entity / Domain specific transformation """ 
         return {}
 
+    @abstractmethod
+    def combine(self, trans: Dict, next: Dict) -> bool:
+        """ Entity / Domain specific combine """ 
+        return False
+
     def csv_to_json(self, csv_file: TextIO, json_file: TextIO) -> None:
         """ Converts the CSV to JSON """
-
         write = json_file.write
-        transform = self.transform
         dumps = json.dumps
 
         r = reader(csv_file, getattr(self, "__fields__"))
-        write(dumps(transform(next(r))))
-        for fields in r:
+        transform = self.transformation(r)
+
+        write(dumps(next(transform)))
+        for trans in transform:
             write("\n")
-            write(dumps(transform(fields)))
+            write(dumps(trans))

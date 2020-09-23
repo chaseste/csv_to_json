@@ -12,13 +12,21 @@ from .csv_transfomer import (
     transform_name,
     transform_physician,
     transform_reactions,
-    transform_comments
+    transform_comments,
+    is_same_person
 )
 
 class AllergyToJson(CsvToJson):
     """ Allergy CSV to Json Transformer """
 
     __fields__ = 19
+
+    def combine(self, trans: Dict, next_trans: Dict) -> bool:
+        if is_same_person(trans, next_trans):
+            allergies = trans["allergys"]
+            allergies.append(next_trans["allergys"][0])
+            return True
+        return False
 
     def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
@@ -52,6 +60,13 @@ class ProblemToJson(CsvToJson):
     """ Problem CSV to Json Transformer """
 
     __fields__ = 26
+
+    def combine(self, trans: Dict, next_trans: Dict) -> bool:
+        if is_same_person(trans, next_trans):
+            problems = trans["problems"]
+            problems.append(next_trans["problems"][0])
+            return True
+        return False
 
     def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
