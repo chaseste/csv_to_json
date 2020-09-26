@@ -20,11 +20,11 @@ def main():
         sys.exit(1)
 
     src_dir, dest_dir = sys.argv[2], sys.argv[3]
-    join, remove = os.path.join, os.remove
+    join, remove, transformer = os.path.join, os.remove, dispatch[trans_type]
     for filename in list(filter(lambda f: f.endswith(".csv"), os.listdir(src_dir))):
-        src = join(src_dir, filename)
-        with open(src) as f_csv, open(join(dest_dir, "".join([filename[:-3], "json"])), "w") as f_json:
-            dispatch[trans_type].csv_to_json(f_csv, f_json)
+        src, dest = join(src_dir, filename), join(dest_dir, "".join([filename[:-3], "json"]))
+        with open(src) as f_csv, open(dest, "w") as f_json:
+            transformer.csv_to_json(f_csv, f_json)
         remove(src)
 
 if __name__ == "__main__":

@@ -133,7 +133,6 @@ class CsvToJson(metaclass=ABCMeta):
             corresponding JSON record """
         transform = self.transform
 
-        yield transform(next(r))
         for fields in r:
             yield transform(fields)
 

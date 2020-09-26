@@ -5,7 +5,9 @@ CSV to JSON transform
 ![python](https://img.shields.io/badge/python-3.8-blue)
 
 ##### Table of Contents
+- [Motivation?](#motivation)
 - [Why Bother?](#why-bother)
+- [Design?](#design)
 - [CSV](#csv)
   * [Delimiters](#delimiters)
   * [!Disclaimer!](#disclaimer)
@@ -35,18 +37,96 @@ CSV to JSON transform
 - [Code Coverage](#code-coverage)
   * [Coverage Report](#report)
 
+# Motivation
+Python is considered a slow programming language. So much so that Python's performance is often ridiculed as its biggest weekness / downfall. My curiosity was to take a task thats split between IO and CPU bound to see how Python would fair. Would Python fair well? Would compiling to C make a significant difference? The task I picked was transforming a CSV specification from file to JSON. The specification is a good example since it doesn't work with Python's native parser.
+
 # Why Bother?
-CSV works great for simple data where the data is relatively flat (table dump, etc.) though for complex data where fields (columns) can repeat, have subfields, etc. CSV breaks down. The transformation of the CSV into something processable is mainly on each comsumer. Enter JSON. JSON works well with simple and complex data. Is supported by most if not all programming languages either natively or via extension. Is relatively light wieght and parsing is generally pretty fast since it powers the web. 
+CSV works great for simple data where the data is relatively flat (table dump, etc.) though for complex data where fields (columns) can repeat, have subfields, etc. CSV breaks down. The transformation of CSV into something more processable is mainly on each comsumer. Enter JSON. JSON works well with simple and complex data. Is supported by most if not all programming languages either natively or via extension. Is relatively light wieght and parsing is generally pretty fast since it powers the web. 
 
-So why not update your process to output JSON and abandon CSV? Thats the hard part. Moving away from a standard encures a cost to consumers that have already figured out your CSV. Maintaining support for mutliple formats can add development | complexity | maintanence costs. Maybe your long term goal is to move away from CSV though doing so isn't feasible within your current tooling | infrastructure. Enter post processing. Post processing your existing CSV to an intermediate can be a reasonable way to leave your existing platform alone while providing data in a richer format that can be transformed | consumed more readily.
+So why not update your process to output JSON and abandon CSV? Thats the hard part. Moving away from a standard encures a cost to consumers that have already figured out your CSV. Maintaining support for mutliple formats can add development | complexity | maintanence costs. Maybe your long term goal is to move away from CSV though doing so isn't feasible within your current tooling | infrastructure. Enter post processing. Post processing your existing CSV to an intermediate can be a reasonable way to leave your existing platform alone while providing data in a richer format that can be transformed | consumed more readily. Maybe you're implementing a data pipeline or importing the CSV into a system and would like to convert the CSV into format more readily consumed. Either way, JSON is a good answer.
 
-So why Python? Python is a simple programming language to learn, has tons of libraries, community support, along with a robust job orchestraton / workflow platform like [Airflow](https://airflow.apache.org/). 
+So why Python? Python is a simple programming language to learn, has tons of libraries, community support, along with a robust job orchestraton / workflow platform like [Airflow](https://airflow.apache.org/). The biggest motivation in my opinion. Time. I'm by no means an expert Python programmer. In total I spent around 8 hours coding this example. Did I write tests? Not completely... though it wouldn't take much time to complete. Adding additional transforms is pretty straight forward. Adding the problem transform took around 30 minutes. Most of my time was spent creating the initial allergy transform and profiling the code.
 
-Back to the real motivation. Time. I'm by no means an expert Python programmer. In total I spent around 8 hours coding the transforms. Did I write tests? Not completely... though it wouldn't take too much time to complete. Adding additional transforms is pretty straight forward. Adding the problem transform took around 30 minutes. Most of my time was spent creating the initial (allergy) transform, profiling the code. Being able to write a transform quickly is key if your goal is to be a bridge long term or the transform is specific to a consumer request (one off). 
+Final comments. Whether you chose to use Python or not. Implementing JSON is beneficial for cases where consumers (clients) request (pay) for one off mappings to their proprietory spec. Given JSON is easy to work with, writing these one off transforms from JSON will reduce coding time. Using a program language like Python along with a worflow platform like airflow you can create transformation pipelines where the initial step is converting to JSON. JSON also allows for consolidation | grouping of data where the JSON object could echo your CSV where each row has a coresponding JSON object or the object contains similar rows (aka all person allergies vs a single allergy) without having to define a new object. 
 
-Final comments. Whether you chose to use Python or not. Implementing JSON is beneficial for cases where consumers (clients) request (pay) for one off mappings to their proprietory spec. Given JSON is easy to work with, writing these one off transforms from JSON will reduce coding time. Using a program language like Python along with a worflow platform like airflow you can create transformation pipelines where the initial step is converting to JSON. JSON also allows for consolidation | grouping of data where the JSON object could echo your CSV where each row has a coresponding JSON object or the object contains similar rows (aka all person allergies vs a single allergy) without having to define a new object (JSON lists). 
+So is Python good enough? Maybe...
 
-So is Python good enough? Maybe... Still not convinced JSON is the way? Should probably stop here unless you're curious.
+# Design
+The design is based on dispatch functions where the user / consumer specifies the transformation and its mapped to a transformer.
+
+```
+transform.py
+    ...
+    combine = "-C" == sys.argv[4].upper() if len(sys.argv) == 5 else False
+    dispatch = { 
+        "ALLERGY": transformers.AllergyToJson(combine=combine),
+        "PROBLEM": transformers.ProblemToJson(combine=combine)
+    }
+	...
+    src_dir, dest_dir = sys.argv[2], sys.argv[3]
+    join, remove, transformer = os.path.join, os.remove, dispatch[trans_type]
+    for filename in list(filter(lambda f: f.endswith(".csv"), os.listdir(src_dir))):
+        src, dest = join(src_dir, filename), join(dest_dir, "".join([filename[:-3], "json"]))
+        with open(src) as f_csv, open(dest, "w") as f_json:
+            transformer.csv_to_json(f_csv, f_json)
+        remove(src)
+	...
+```
+
+Python supports OOP (Object Oriented Programming) though accessing methods from a class hierachy is slow. To give Python a chance a mix of OOP is used to define the transforms though common methods called frequently to perform the transform are left outside the class hierarchy. References to functions called frequently are used when possible to further aide / limit the amout of time spent by the interpreter. 
+
+Finally references to functions are used to switch the transformation performed at runtime without having to decorate the class hierarchy. Doing so limits the performance impact of having multiple transforms (identity vs combining like instances) by having a single if statement evaluation when the transformer is constructed. This follows the idiom to try and fail instead of checking beforehand since the verification for each valid invocation is incurred. This idiom is applied as well where applicable.
+
+```
+csv_transfomer.py
+""" CSV Transformation Base """
+...
+def identity_transform(orig: Dict[str, str], org_key: str, dest: Dict) -> None:
+    """ Identity transform from one field in a dict to another """
+    try:
+        dest[org_key] = orig[org_key]
+    except KeyError:
+        pass
+...
+class CsvToJson(metaclass=ABCMeta):
+    """ Base CSV to JSON transformer """
+
+    def __init__(self, combine:bool = False):
+        self.transformation = self.__combine_transform if combine else self.__idenity_transform
+
+    def __idenity_transform(self, r):
+        """ Performs an identity transformation where each row in the CSV will have a
+            corresponding JSON record """
+		...
+
+    def __combine_transform(self, r):
+        """ Performs an combine transformation where similar CSV records will be combined
+            into a single JSON record """
+		...
+
+    @abstractmethod
+    def transform(self, fields: List[List[str]]) -> Dict:
+        """ Entity / Domain specific transformation """ 
+        return {}
+
+    @abstractmethod
+    def combine(self, trans: Dict, next: Dict) -> bool:
+        """ Entity / Domain specific combine """ 
+        return False
+
+    def csv_to_json(self, csv_file: TextIO, json_file: TextIO) -> None:
+        """ Converts the CSV to JSON """
+        write = json_file.write
+        dumps = json.dumps
+
+        r = reader(csv_file, getattr(self, "__fields__"))
+        transform = self.transformation(r)
+
+        write(dumps(next(transform)))
+        for trans in transform:
+            write("\n")
+            write(dumps(trans))
+```
 
 # CSV 
 The CSV specification used is based on the Cerner Millennium extract specifications.
@@ -198,7 +278,7 @@ The out of the box Python parser will only escape / maintain the escape "quotes"
 As of now only Allergy | Problem transforms were written.
 
 ## Identity Transform
-Each record in the CSV will have a corresponding json record in the output file. This is the default
+Each record in the CSV will have a corresponding JSON record in the output file. This is the default.
 
 ## Combine Transform
 Records for the same person in the CSV will be combined into a single JSON record in the output file. A person is considered the same when they have the same name, birth date and gender.
@@ -231,7 +311,7 @@ python setup.py build_ext --inplace
 ```
 
 ## Profiling
-I profiled the allergy transform to get an idea of how "bad" or "good" an idea using Python is. Data was collected using cProfile with a 488 MB CSV containing a little over 1M rows. The CSV was constructed from the sample allergy csv.
+I profiled the allergy transform to get an idea of how "bad" or "good" an idea using Python is. Data was collected using cProfile with a 488 MB CSV containing a little over 1M rows. The CSV was constructed from the sample allergy csv. The default transform was used.
 
 ### Command
 ```
@@ -278,6 +358,7 @@ By default Cython won't provide profiling information. To enable this for csv_re
 - Additional unit tests
 - Additional combine logic?
 - Additional transforms?
+- Profile combine transform?
 
 # Running the Tests
 The tests can be run locally against the source code or the installed module.
