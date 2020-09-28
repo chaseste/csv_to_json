@@ -6,7 +6,6 @@ from .csv_transfomer import (
     transform_string_optional,
     transform_code,
     transform_code_optional,
-    transform_codes,
     transform_codes_optional,
     transform_ids,
     transform_name,
@@ -30,10 +29,12 @@ class AllergyToJson(CsvToJson):
 
     def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
-            "ids": transform_ids(fields[1]),
-            "name": transform_name(fields[2]),
-            "birth_date": transform_string(fields[3]),
-            "admin_sex": transform_code(fields[4]),
+            "patient": {
+                "ids": transform_ids(fields[1]),
+                "name": transform_name(fields[2]),
+                "birth_date": transform_string(fields[3]),
+                "admin_sex": transform_code(fields[4])
+            },
             "encounter": {
                 "ids": transform_ids(fields[5])
             },
@@ -70,10 +71,12 @@ class ProblemToJson(CsvToJson):
 
     def transform(self, fields: List[List[str]]) -> Dict:
         trans = {
-            "ids": transform_ids(fields[1]),
-            "name": transform_name(fields[2]),
-            "birth_date": transform_string(fields[3]),
-            "admin_sex": transform_code(fields[4]),
+            "patient": {
+                "ids": transform_ids(fields[1]),
+                "name": transform_name(fields[2]),
+                "birth_date": transform_string(fields[3]),
+                "admin_sex": transform_code(fields[4])
+            },
             "problems": [{
                 "action_dt_tm": transform_string(fields[5]),
                 "condition": transform_code(fields[6]),

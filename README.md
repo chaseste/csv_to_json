@@ -151,33 +151,35 @@ The out of the box Python parser will only escape / maintain the escape "quotes"
 
 ## Raw (Unformatted)
 ```
-{"ids": [{"id": "12345", "authority": "Hospital MRN", "id_type": "MRN"}, {"id": "67890", "authority": "HIE MRN", "id_type": "CMRN"}], "name": {"last": "ZZLast", "first": "Jane", "middle": "Marie"}, "birth_date": "19500701143000", "admin_sex": {"id": "362", "description": "Female"}, "encounter": {"ids": [{"id": "893727", "authority": "Hospital FIN", "id_type": "FIN"}]}, "allergys": [{"allergen_type": {"id": "Drug"}, "allergen": {"id": "723", "description": "Amoxicillin", "coding_method": "RXCUI"}, "severity": {"id": "SEVERE"}, "onset": "20180724", "reaction_status": {"id": "CANCELED"}, "reaction_class": {"id": "CLASS"}, "source_of_info": {"id": "PARENT"}, "source_of_info_ft": "Parent", "cancel_dt_tm": "20190813165421", "reviewed_dt_tm": "20190813165431", "reactions": [{"code": {"id": "498834018", "description": "Abdominal swelling |~ distended areas", "coding_method": "SNOMED"}, "severity": {"id": "777777", "description": "desc", "coding_method": "SNOMED"}}], "physician": {"id": {"id": "13243", "authority": "NPI"}, "name": {"last": "ZZPhylast", "first": "Robert"}, "phys_type": "REV"}, "comments": [{"text": "Discovered during ER visit ~July|August 2018", "comment_dt_tm": "06/19/1999 12:34:56", "physician": {"id": {"id": "ID1234", "authority": "NPI"}, "name": {"last": "Test1", "first": "Physician1"}}}, {"text": "Bad swelling to \"chest\", head", "comment_dt_tm": "01/01/1991 01:11:11", "physician": {"id": {"id": "ID5678", "authority": "NPI"}, "name": {"last": "Test2", "first": "Physician2"}}}]}]}
+{"patient": {"ids": [{"id": "12345", "authority": "Hospital MRN", "id_type": "MRN"}, {"id": "67890", "authority": "HIE MRN", "id_type": "CMRN"}], "name": {"last": "ZZLast", "first": "Jane", "middle": "Marie"}, "birth_date": "19500701143000", "admin_sex": {"id": "362", "description": "Female"}}, "encounter": {"ids": [{"id": "893727", "authority": "Hospital FIN", "id_type": "FIN"}]}, "allergys": [{"allergen_type": {"id": "Drug"}, "allergen": {"id": "723", "description": "Amoxicillin", "coding_method": "RXCUI"}, "severity": {"id": "SEVERE"}, "onset": "20180724", "reaction_status": {"id": "CANCELED"}, "reaction_class": {"id": "CLASS"}, "source_of_info": {"id": "PARENT"}, "source_of_info_ft": "Parent", "cancel_dt_tm": "20190813165421", "reviewed_dt_tm": "20190813165431", "reactions": [{"code": {"id": "498834018", "description": "Abdominal swelling |~ distended areas", "coding_method": "SNOMED"}, "severity": {"id": "777777", "description": "desc", "coding_method": "SNOMED"}}], "physician": {"id": {"id": "13243", "authority": "NPI"}, "name": {"last": "ZZPhylast", "first": "Robert"}, "phys_type": "REV"}, "comments": [{"text": "Discovered during ER visit ~July|August 2018", "comment_dt_tm": "06/19/1999 12:34:56", "physician": {"id": {"id": "ID1234", "authority": "NPI"}, "name": {"last": "Test1", "first": "Physician1"}}}, {"text": "Bad swelling to \"chest\", head", "comment_dt_tm": "01/01/1991 01:11:11", "physician": {"id": {"id": "ID5678", "authority": "NPI"}, "name": {"last": "Test2", "first": "Physician2"}}}]}]}
 ```
 
 ## Formatted
 ```
 {
-	"ids": [
-		{
-			"id": "12345",
-			"authority": "Hospital MRN",
-			"id_type": "MRN"
+	"patient": {
+		"ids": [
+			{
+				"id": "12345",
+				"authority": "Hospital MRN",
+				"id_type": "MRN"
+			},
+			{
+				"id": "67890",
+				"authority": "HIE MRN",
+				"id_type": "CMRN"
+			}
+		],
+		"name": {
+			"last": "ZZLast",
+			"first": "Jane",
+			"middle": "Marie"
 		},
-		{
-			"id": "67890",
-			"authority": "HIE MRN",
-			"id_type": "CMRN"
+		"birth_date": "19500701143000",
+		"admin_sex": {
+			"id": "362",
+			"description": "Female"
 		}
-	],
-	"name": {
-		"last": "ZZLast",
-		"first": "Jane",
-		"middle": "Marie"
-	},
-	"birth_date": "19500701143000",
-	"admin_sex": {
-		"id": "362",
-		"description": "Female"
 	},
 	"encounter": {
 		"ids": [

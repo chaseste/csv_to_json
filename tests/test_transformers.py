@@ -21,6 +21,7 @@ def test_allergy_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
 
         allergyToJson.csv_to_json(f_csv, f_json)
         assert spy.spy_return
+        assert spy.spy_return["patient"]["birth_date"] == "19500701143000"
         assert len(spy.spy_return["allergys"]) == 1
         assert spy.spy_return["allergys"][0]["onset"] == "20180724"
 
@@ -29,7 +30,7 @@ def test_allergy_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
         assert len(lines) == 1
         
         _json = json.loads(lines[0])
-        assert _json["birth_date"] == "19500701143000"
+        assert _json["patient"]["birth_date"] == "19500701143000"
         assert _json["allergys"][0]["onset"] == "20180724"
 
 def test_problem_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
@@ -41,7 +42,7 @@ def test_problem_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
 
         problemToJson.csv_to_json(f_csv, f_json)
         assert spy.spy_return
-        assert spy.spy_return["birth_date"] == "19500701143000"
+        assert spy.spy_return["patient"]["birth_date"] == "19500701143000"
         assert len(spy.spy_return["problems"]) == 1
         assert spy.spy_return["problems"][0]["annotated_display"] == "This is the annotated display."
 
@@ -50,7 +51,7 @@ def test_problem_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
         assert len(lines) == 1
 
         _json = json.loads(lines[0])
-        assert _json["birth_date"] == "19500701143000"
+        assert _json["patient"]["birth_date"] == "19500701143000"
         assert _json["problems"][0]["annotated_display"] == "This is the annotated display."
 
 def test_allergy_combine_transform(dir: TempDirectory, mocker: MockerFixture) -> None:
@@ -79,6 +80,6 @@ def test_problem_combine_transform(dir: TempDirectory, mocker: MockerFixture) ->
         lines = f_json.readlines()
         assert len(lines) == 1
 
-        _json = json.loads(lines[0])        
+        _json = json.loads(lines[0])
         assert _json["problems"][0]["annotated_display"] == "This is the annotated display."
         assert _json["problems"][1]["annotated_display"] == "This is another annotated display."

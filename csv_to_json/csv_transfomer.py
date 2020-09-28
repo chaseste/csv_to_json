@@ -6,8 +6,10 @@ from .csv_reader import reader, csv_to_list, csv_to_dict
 
 def is_same_person(trans: Dict, next_trans: Dict) -> bool:
     """ Whether the person is the same for both transformations """
-    return trans["name"] == next_trans["name"] and trans["birth_date"] == next_trans["birth_date"] and\
-        trans["admin_sex"] == next_trans["admin_sex"]
+    patient = trans["patient"]
+    next_patient = next_trans["patient"]
+    return patient["name"] == next_patient["name"] and patient["birth_date"] == next_patient["birth_date"] and\
+        patient["admin_sex"] == next_patient["admin_sex"]
 
 def identity_transform(orig: Dict[str, str], org_key: str, dest: Dict) -> None:
     """ Identity transform from one field in a dict to another """
